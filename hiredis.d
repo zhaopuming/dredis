@@ -133,4 +133,56 @@ int redisReaderGetReply(redisReader *r, void **reply);
 
 /* Backwards compatibility, can be removed on big version bump. */
 
+/* Function to free the reply objects hiredis returns by default. */
+void freeReplyObject(void* reply);
+
+/* Functions to format a command according to the protocol. */
+int redisvFormatCommand(char** target, const char* format, va_list ap);
+int redisFormatCommand(char** target, const char* format, ...);
+int redisFormatCommandArgv(char** target, int argc, const char** argv, const size_t* argvlen);
+
+/* Context for a connection to Redis */
+struct redisContext {
+    int err; /* Error flags, 0 when there is no error */
+    char errstr[128]; /* String representation of error when applicable */
+    int fd;
+    int flags;
+    char* obuf; /* Write buffer */
+    redisReader* reader; /* Protocol reader */
+};
+
+redisContext* redisConnect(const char* ip, int port);
+redisContext* redisConnectWithTimeout(const char* ip, int port, struct timeval tv);
+redisContext* redisConnectNonBlock(const char* ip, int port);
+redisContext* redisConnectUnix(const char* path);
+redisContext* redisConnectUnixWithTimeout(const char* path, struct timeval tv);
+redisContext* redisConnectUnixNonBlock(const char* path);
+int redisSetTimeout(redisContext* c, struct timeval tv);
+void redisFree(redisContext* c);
+int redisBufferRead(redisContext* c);
+int redisBufferWrite(redisContext* c, int* done);
+
+/* In a blocking context, this function first checks if there are unconsumed
+ * replies to return and returns one if so. Otherwise, it flushes the output
+ * buffer to the socket and reads until it has a reply. In a non-blocking
+ * context, it will return unconsumed replies until there are no more. */
+int redisGetReply(redisContext *c, void **reply);
+int redisGetReplyFromReader(redisContext *c, void **reply);
+
+/* Write a command to the output buffer. Use these functions in blocking mode
+ * to get a pipeline of commands. */
+int redisvAppendCommand(redisContext* c, const char* format, va_list ap);
+int redisAppendCommand(redisContext* c, const char* format, ...);
+int redisAppendCommandArgv(redisContext* c, int argc, const char** argv, const size_t* argvlen);
+
+/* Issue a command to Redis. In a blocking context, it is identical to calling
+ * redisAppendCommand, followed by redisGetReply. The function will return
+ * NULL if there was an error in performing the request, otherwise it will
+ * return the reply. In a non-blocking context, it is identical to calling
+ * only redisAppendCommand and will always return NULL. */
+void* redisvCommand(redisContext* c, const char* format, va_list ap);
+void* redisCommand(redisContext* c, const char* format, ...);
+void* redisCommandArgv(redisContext* c, int argc, const char** argv, const size_t* argvlen);
+
+
 }
