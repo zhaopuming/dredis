@@ -31,7 +31,7 @@
  */
 import std.stdio;
 import std.c.stdarg;
-import std.c.time;
+import core.sys.posix.sys.time;
 
 extern (C) {
 enum HIREDIS_MAJOR = 0;
@@ -151,13 +151,13 @@ struct redisContext {
     redisReader* reader; /* Protocol reader */
 };
 
-redisContext* redisConnect(const char* ip, int port);
-redisContext* redisConnectWithTimeout(const char* ip, int port, struct timeval tv);
+extern (C) redisContext* redisConnect(const char* ip, int port);
+extern (C) redisContext* redisConnectWithTimeout(const char* ip, int port, timeval tv);
 redisContext* redisConnectNonBlock(const char* ip, int port);
 redisContext* redisConnectUnix(const char* path);
-redisContext* redisConnectUnixWithTimeout(const char* path, struct timeval tv);
+redisContext* redisConnectUnixWithTimeout(const char* path, timeval tv);
 redisContext* redisConnectUnixNonBlock(const char* path);
-int redisSetTimeout(redisContext* c, struct timeval tv);
+int redisSetTimeout(redisContext* c, timeval tv);
 void redisFree(redisContext* c);
 int redisBufferRead(redisContext* c);
 int redisBufferWrite(redisContext* c, int* done);
