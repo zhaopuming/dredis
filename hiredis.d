@@ -101,11 +101,11 @@ struct redisReadTask {
 };
 
 struct redisReplyObjectFunctions {
-    void* createString(const redisReadTask*, char*, size_t);
-    void* createArray(const redisReadTask*, int);
-    void* createInteger(const redisReadTask*, long);
-    void* createNil(const redisReadTask*);
-    void* freeObject(void*);
+    void* function(const redisReadTask*, char*, size_t) createString;
+    void* function(const redisReadTask*, int) createArray;
+    void* function(const redisReadTask*, long) createInteger;
+    void* function(const redisReadTask*) createNil;
+    void* function(void*) freeObject;
 };
 
 /* State for the protocol parser */
@@ -119,10 +119,10 @@ struct redisReader {
 
     redisReadTask rstack[4];
     int ridx; /* Index of current read task */
-    void *reply; /* Temporary reply pointer */
+    void* reply; /* Temporary reply pointer */
 
     redisReplyObjectFunctions *fn;
-    void *privdata;
+    void* privdata;
 };
 
 /* Public API for the protocol parser. */
@@ -151,8 +151,8 @@ struct redisContext {
     redisReader* reader; /* Protocol reader */
 };
 
-extern (C) redisContext* redisConnect(const char* ip, int port);
-extern (C) redisContext* redisConnectWithTimeout(const char* ip, int port, timeval tv);
+redisContext* redisConnect(const char* ip, int port);
+redisContext* redisConnectWithTimeout(const char* ip, int port, timeval tv);
 redisContext* redisConnectNonBlock(const char* ip, int port);
 redisContext* redisConnectUnix(const char* path);
 redisContext* redisConnectUnixWithTimeout(const char* path, timeval tv);
@@ -166,8 +166,8 @@ int redisBufferWrite(redisContext* c, int* done);
  * replies to return and returns one if so. Otherwise, it flushes the output
  * buffer to the socket and reads until it has a reply. In a non-blocking
  * context, it will return unconsumed replies until there are no more. */
-int redisGetReply(redisContext *c, void **reply);
-int redisGetReplyFromReader(redisContext *c, void **reply);
+int redisGetReply(redisContext* c, void** reply);
+int redisGetReplyFromReader(redisContext* c, void** reply);
 
 /* Write a command to the output buffer. Use these functions in blocking mode
  * to get a pipeline of commands. */

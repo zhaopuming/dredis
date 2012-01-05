@@ -1,15 +1,15 @@
 #!/usr/bin/rdmd -L-lhiredis
 import std.stdio;
 import core.stdc.stdlib;
-import dredis;
 import core.sys.posix.sys.time;
+import std.conv;
+
+import dredis;
+
 void main()
 {
   redisContext* c;
   redisReply* reply;
-  redisReply rep = redisReply();
-  rep.str = cast(char*)"123";
-  writeln(rep.str);
   timeval timeout = {1, 5000000}; // 1.5 seconds;
   c = redisConnectWithTimeout("127.0.0.1", 6379, timeout);
   if (c.err) {
@@ -17,17 +17,18 @@ void main()
     exit(1);
   }
   /* Ping server */
-  reply = cast(redisReply*) redisCommand(c, "PING");
+  void* rp = redisCommand(c, "PING");
+  reply = cast(redisReply*) rp;
   writefln("PING: %s", reply.str);
   freeReplyObject(reply);
   /* Set a key */
-  writeln("set...");
-  reply = cast(redisReply*) redisCommand(c, "SET foo bar");
+  reply = cast(redisReply*) redisCommand(c, "SET foo ar");
   writefln("SET: %s", reply.str);
   freeReplyObject(reply);
   /* Get a value */
   reply = cast(redisReply*) redisCommand(c, "GET foo");
-  writefln("GET: %s:%s", "foo", reply.str);
+  writefln("GET foo: %s", *reply);
+  printf(reply.str);
   freeReplyObject(reply);
 }
 
