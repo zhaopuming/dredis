@@ -1,4 +1,3 @@
-#!/usr/bin/rdmd --shebang -unittest
 /*
  * Copyright (c) 2009-2011, Salvatore Sanfilippo <antirez at gmail dot com>
  * Copyright (c) 2010-2011, Pieter Noordhuis <pcnoordhuis at gmail dot com>
@@ -183,6 +182,5 @@ int redisAppendCommandArgv(redisContext* c, int argc, const char** argv, const s
 void* redisvCommand(redisContext* c, const char* format, va_list ap);
 void* redisCommand(redisContext* c, const char* format, ...);
 void* redisCommandArgv(redisContext* c, int argc, const char** argv, const size_t* argvlen);
-
 
 }
