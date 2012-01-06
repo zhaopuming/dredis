@@ -84,7 +84,7 @@ enum REDIS_REPLY_ERROR = 6;
 /* This is the reply object returned by redisCommand() */
 struct redisReply {
     int type; /* REDIS_REPLY_* */
-    c_long integer; /* The integer when type is REDIS_REPLY_INTEGER */
+    long integer; /* The integer when type is REDIS_REPLY_INTEGER */
     int len; /* Length of string */
     char* str; /* Used for both REDIS_REPLY_ERROR and REDIS_REPLY_STRING */
     size_t elements; /* number of elements, for REDIS_REPLY_ARRAY */

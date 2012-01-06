@@ -19,17 +19,15 @@ void main()
   /* Ping server */
   void* rp = redisCommand(c, "PING");
   reply = cast(redisReply*) rp;
-  writefln("PING: %s", reply.str);
+  writefln("PING: %s", to!string(reply.str));
   freeReplyObject(reply);
   /* Set a key */
   reply = cast(redisReply*) redisCommand(c, "SET foo ar");
-  writefln("SET: %s", reply.str);
+  writefln("SET: %s", to!string(reply.str));
   freeReplyObject(reply);
   /* Get a value */
   reply = cast(redisReply*) redisCommand(c, "GET foo");
-  writefln("GET foo: %s", *reply);
-  writeln("reply str: " + reply.str);
-  writefln(to!string(reply.str));
+  writefln("GET foo: %s", to!string(reply.str));
   freeReplyObject(reply);
 }
 
