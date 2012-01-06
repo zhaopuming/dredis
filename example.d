@@ -13,7 +13,7 @@ void main()
   timeval timeout = {1, 5000000}; // 1.5 seconds;
   c = redisConnectWithTimeout("127.0.0.1", 6379, timeout);
   if (c.err) {
-    printf("Connection error: %s\n", c.errstr);
+    printf("Connection error: %s\n", c.errstr.ptr);
     exit(1);
   }
   /* Ping server */
@@ -28,7 +28,8 @@ void main()
   /* Get a value */
   reply = cast(redisReply*) redisCommand(c, "GET foo");
   writefln("GET foo: %s", *reply);
-  printf(reply.str);
+  writeln("reply str: " + reply.str);
+  writefln(to!string(reply.str));
   freeReplyObject(reply);
 }
 
