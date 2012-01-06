@@ -4,7 +4,7 @@ import core.stdc.stdlib;
 import core.sys.posix.sys.time;
 import std.conv;
 
-import dredis;
+import hiredis;
 
 void main()
 {

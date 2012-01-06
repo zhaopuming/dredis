@@ -31,6 +31,7 @@
 import std.stdio;
 import std.c.stdarg;
 import core.sys.posix.sys.time;
+import core.stdc.config;
 
 extern (C) {
 enum HIREDIS_MAJOR = 0;
@@ -83,7 +84,7 @@ enum REDIS_REPLY_ERROR = 6;
 /* This is the reply object returned by redisCommand() */
 struct redisReply {
     int type; /* REDIS_REPLY_* */
-    int integer; /* The integer when type is REDIS_REPLY_INTEGER */
+    c_long integer; /* The integer when type is REDIS_REPLY_INTEGER */
     int len; /* Length of string */
     char* str; /* Used for both REDIS_REPLY_ERROR and REDIS_REPLY_STRING */
     size_t elements; /* number of elements, for REDIS_REPLY_ARRAY */
