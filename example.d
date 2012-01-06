@@ -1,4 +1,4 @@
-#!/usr/bin/rdmd -L-lhiredis
+#!/usr/bin/rdmd -I/usr/include/d/hiredis -L-lhiredis
 import std.stdio;
 import core.stdc.stdlib;
 import core.sys.posix.sys.time;
