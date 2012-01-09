@@ -20,20 +20,23 @@ template DredisTemplate(bool isThrow)
   class Redis
   {
     private redisContext* context;
-    // TODO: Mayby default values should be config as template args
-    private string defaultString = "nil";
-    private long defaultNumber = 0L;
-
-    public void setDefaultValue(string str)
+    static if (!isThrow)
     {
-      defaultString = str;
-    }
+      // TODO: Mayby default values should be config as template args
+      private string defaultString = "nil";
+      private long defaultNumber = 0L;
 
-    public void setDefaultNumber(long number)
-    {
-      defaultNumber = number;
-    }
+      public void setDefaultValue(string str)
+      {
+        defaultString = str;
+      }
 
+      public void setDefaultNumber(long number)
+      {
+        defaultNumber = number;
+      }
+
+    }
     public redisContext* getContext()
     {
       return context;
@@ -74,7 +77,15 @@ template DredisTemplate(bool isThrow)
             break;
           }
         default:
-          s = defaultString;
+          static if (isThrow)
+          {
+            throw new DredisException("haha");
+
+          }
+          else
+          {
+            s = defaultString;
+          }
       }
       freeReplyObject(rep);
       return s;
@@ -95,14 +106,24 @@ template DredisTemplate(bool isThrow)
           break;
         case REDIS_REPLY_ERROR:
           // TODO: when in ExcMode, throw an exception
-          static if (isThrow) {
+          static if (isThrow)
+          {
             throw new DredisException("ahah");
-          } else {
-          s = defaultNumber;
+          }
+          else
+          {
+            s = defaultNumber;
           }
           break;
         default:
-          s = defaultNumber;
+          static if (isThrow)
+          {
+            throw new DredisException("haha");
+          }
+          else
+          {
+            s = defaultNumber;
+          }
           break;
       }
       freeReplyObject(rep);
@@ -132,7 +153,18 @@ template DredisTemplate(bool isThrow)
 
 }
 
+/**
+ * Dredis Client. When error occurs, throws DredisException
+ */
 alias DredisTemplate!true.Redis Dredis;
+
+/**
+ * FastDredis Client. When error occurs, return a default value.
+ * By default:
+ *   defaultString = "nil";
+ *   defaultNumber = 0L;
+ * You can also specify default values with setDefaultXXX methods.
+ */
 alias DredisTemplate!false.Redis FastDredis;
 
 void main() {
