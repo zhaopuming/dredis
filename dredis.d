@@ -5,12 +5,15 @@ import std.conv;
 import std.string;
 import hiredis;
 
-struct RedisReply {
+struct RedisReply
+{
   string str;
 }
 
-class DredisException : Exception {
-  this(string s) {
+class DredisException : Exception
+{
+  this(string s)
+  {
     super(s);
   }
 }
@@ -143,7 +146,8 @@ template DredisTemplate(bool isThrow)
     {
       redisReply* rep = cast(redisReply*) redisCommand(context, toStringz(cmd ~ " %s %s"), toStringz(key), toStringz(val));
       bool succ = true;
-      if (rep.type == REDIS_REPLY_ERROR) {
+      if (rep.type == REDIS_REPLY_ERROR)
+      {
         succ = false;
       }
       freeReplyObject(rep);
@@ -160,9 +164,10 @@ alias DredisTemplate!true.Redis Dredis;
 
 /**
  * FastDredis Client. When error occurs, return a default value.
- * By default:
+ * By default: {
  *   defaultString = "nil";
  *   defaultNumber = 0L;
+ * }
  * You can also specify default values with setDefaultXXX methods.
  */
 alias DredisTemplate!false.Redis FastDredis;
