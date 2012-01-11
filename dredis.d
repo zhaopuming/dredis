@@ -60,6 +60,30 @@ template DredisTemplate(bool isThrow)
       return boolCmd("SET", key, val);
     }
 
+    private string errStr(string msg)
+    {
+      static if (isThrow)
+      {
+        throw new DredisException(msg);
+      }
+      else
+      {
+        return defaultString;
+      }
+    }
+
+    private long errLong(string msg)
+    {
+      static if (isThrow)
+      {
+        throw new DredisException(msg);
+      }
+      else
+      {
+        return defaultNumber;
+      }
+    }
+
     public string get(const(char)[] key)
     {
       redisReply* rep = cast(redisReply*) redisCommand(context, "GET %s", toStringz(key));
@@ -69,26 +93,14 @@ template DredisTemplate(bool isThrow)
         case REDIS_REPLY_STRING:
           s = to!string(rep.str);
           break;
+        case REDIS_REPLY_NIL:
+          s = "nil";
+          break;
         case REDIS_REPLY_ERROR:
-          static if (isThrow)
-          {
-            throw new DredisException("haha");
-          }
-          else
-          {
-            s = defaultString;
-            break;
-          }
+          s = errStr(to!string(rep.str));
+          break;
         default:
-          static if (isThrow)
-          {
-            throw new DredisException("haha");
-
-          }
-          else
-          {
-            s = defaultString;
-          }
+          s = errStr("Other");
       }
       freeReplyObject(rep);
       return s;
@@ -154,7 +166,6 @@ template DredisTemplate(bool isThrow)
       return succ;
     }
   }
-
 }
 
 /**
@@ -163,14 +174,15 @@ template DredisTemplate(bool isThrow)
 alias DredisTemplate!true.Redis Dredis;
 
 /**
- * FastDredis Client. When error occurs, return a default value.
+ * SilentDredis Client that echos no Exception.
+ * When error occurs, returns a default value.
  * By default: {
  *   defaultString = "nil";
  *   defaultNumber = 0L;
  * }
  * You can also specify default values with setDefaultXXX methods.
  */
-alias DredisTemplate!false.Redis FastDredis;
+alias DredisTemplate!false.Redis SilentDredis;
 
 void main() {
   auto r = new Dredis();
@@ -179,6 +191,7 @@ void main() {
   r.set("haha", "hooho");
   writeln(r.get("haha"));
   r.del("haha");
+  writeln(r.get("noexist"));
   writeln(r.get("mylist"));
   writeln(r.getLong("a"));
 }
