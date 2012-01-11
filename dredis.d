@@ -1,4 +1,3 @@
-#!/usr/bin/rdmd --shebang -I/usr/include/d/hiredis -L-lhiredis
 import core.sys.posix.sys.time;
 import std.stdio;
 import std.conv;
@@ -8,9 +7,7 @@ import hiredis;
 struct RedisReply
 {
   string str;
-}
-
-class DredisException : Exception
+} class DredisException : Exception
 {
   this(string s)
   {
@@ -18,6 +15,11 @@ class DredisException : Exception
   }
 }
 
+/**
+ * Contains two flavor of Redis Client
+ * - Dredis (isThrow == true):  a client that throws exception when error occurs
+ * - SilentDredis (isThrow == false): a client that does not throw and returns default values when error occurs.
+ */
 template DredisTemplate(bool isThrow)
 {
   class Redis
@@ -45,10 +47,22 @@ template DredisTemplate(bool isThrow)
       return context;
     }
 
-    public void connect(const(char*) host, int ip, int timeout)
+    public bool connect(const(char*) host, int ip, int timeout)
     {
       timeval ts = {1, timeout * 1000};
       context = redisConnectWithTimeout(host, ip, ts);
+      if (context.err)
+      {
+        static if (isThrow)
+        {
+          throw new DredisException("Cannot connect to redis server!");
+        }
+        return false;
+      }
+      else
+      {
+        return true;
+      }
     }
 
     /****************************
@@ -180,18 +194,6 @@ alias DredisTemplate!true.Redis Dredis;
  *   defaultString = "nil";
  *   defaultNumber = 0L;
  * }
- * You can also specify default values with setDefaultXXX methods.
+ * You can specify default values with setDefaultXXX methods.
  */
 alias DredisTemplate!false.Redis SilentDredis;
-
-void main() {
-  auto r = new Dredis();
-  r.connect("127.0.0.1", 6379, 5000);
-  writeln(r.get("foo"));
-  r.set("haha", "hooho");
-  writeln(r.get("haha"));
-  r.del("haha");
-  writeln(r.get("noexist"));
-  writeln(r.get("mylist"));
-  writeln(r.getLong("a"));
-}
