@@ -7,10 +7,11 @@ import hiredis;
 struct RedisReply
 {
   string str;
-} class DredisException : Exception
+}
+
+class DredisException : Exception
 {
-  this(string s)
-  {
+  this(string s) {
     super(s);
   }
 }
@@ -47,10 +48,10 @@ template DredisTemplate(bool isThrow)
       return context;
     }
 
-    public bool connect(const(char*) host, int ip, int timeout)
+    public bool connect(const(char*) host, int port, int timeout)
     {
       timeval ts = {1, timeout * 1000};
-      context = redisConnectWithTimeout(host, ip, ts);
+      context = redisConnectWithTimeout(host, port, ts);
       if (context.err)
       {
         static if (isThrow)
@@ -166,9 +167,21 @@ template DredisTemplate(bool isThrow)
 
     /**
     * Common implementation of boolean commands
-    * TODO: should support varargs
+    * TODO: How can I combine boolCmd with/without/withmany values?
     **/
-    private bool boolCmd(string cmd, const(char)[] key, const(char)[] val = "")
+    private bool boolCmd(string cmd, const(char)[] key)
+    {
+      redisReply* rep = cast(redisReply*) redisCommand(context, toStringz(cmd ~ " %s"), toStringz(key));
+      bool succ = true;
+      if (rep.type == REDIS_REPLY_ERROR)
+      {
+        succ = false;
+      }
+      freeReplyObject(rep);
+      return succ;
+    }
+
+    private bool boolCmd(string cmd, const(char)[] key, const(char)[] val)
     {
       redisReply* rep = cast(redisReply*) redisCommand(context, toStringz(cmd ~ " %s %s"), toStringz(key), toStringz(val));
       bool succ = true;
